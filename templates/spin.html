@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex flex-col items-center justify-center py-10">
+    <h2 class="text-2xl font-bold text-yellow-500 mb-6">عجلة الحظ</h2>
+    
+    <div id="wheel" class="w-72 h-72 border-8 border-yellow-500 rounded-full flex items-center justify-center transition-transform duration-[5000ms] ease-out">
+        <span class="text-white font-bold">حظ سعيد</span>
+    </div>
+
+    <div id="result-box" class="mt-6 text-xl font-bold text-yellow-400 hidden"></div>
+
+    <button id="spin_button" onclick="spinSimple()" 
+            class="mt-8 bg-yellow-500 text-black px-10 py-3 rounded-full font-bold text-lg hover:bg-yellow-400">
+        لف العجلة الآن
+    </button>
+</div>
+
+<script>
+    async function spinSimple() {
+        const wheel = document.getElementById('wheel');
+        const btn = document.getElementById('spin_button');
+        const resBox = document.getElementById('result-box');
+        
+        btn.disabled = true;
+        resBox.classList.add('hidden');
+        wheel.style.transform = "rotate(3600deg)"; 
+        
+        const res = await fetch('/spin-wheel', { method: 'POST' });
+        const data = await res.json();
+
+        setTimeout(() => {
+            if (data.status === 'success') {
+                resBox.innerText = "مبروك! ربحت: " + data.prize;
+                resBox.classList.remove('hidden');
+                btn.innerText = "إعادة التحميل";
+                btn.onclick = () => location.reload();
+                btn.disabled = false;
+            } else {
+                resBox.innerText = data.message;
+                resBox.classList.remove('hidden');
+                wheel.style.transform = "rotate(0deg)";
+                btn.disabled = false;
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}
