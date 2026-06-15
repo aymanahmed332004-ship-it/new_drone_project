@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - منصة الدرون</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* تم تعديل هذا الجزء ليكون خلفية ثابتة */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -999;
+            background-image: url('/static/products-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: -998;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white p-4 min-h-screen">
+
+    <div class="video-bg"></div>
+    <div class="overlay"></div>
+
+    <div class="max-w-md mx-auto mt-5">
+        <div class="glass p-6 flex justify-between items-center mb-6 rounded-3xl border border-white/10">
+            <div>
+                <p class="text-gray-400 text-xs">مرحباً بك</p>
+                <h2 class="text-xl font-bold">{{ user.phone }}</h2>
+            </div>
+            <a href="/logout" class="text-red-400 text-xs border border-red-500/30 px-3 py-1 rounded-lg hover:bg-red-500 hover:text-white transition">خروج</a>
+        </div>
+
+        <div class="glass p-6 rounded-3xl text-center shadow-2xl mb-8 border border-white/10">
+            <p class="text-gray-400 text-sm">رصيدك الحالي</p>
+            <h1 class="text-4xl font-bold text-sky-400 my-2">{{ "%.2f" | format(user.balance) }} <span class="text-lg">ج.م</span></h1>
+        </div>
+
+        {% if my_products %}
+        <h2 class="text-lg font-bold mb-4 text-white">منتجاتي المشتراة</h2>
+        <div class="space-y-4 mb-8">
+            {% for p in my_products %}
+            <div class="glass p-4 rounded-2xl border border-blue-500/30">
+                <h3 class="text-yellow-500 font-bold">{{ p.name }}</h3>
+                {% if p.can_claim %}
+                    <form action="/claim-daily" method="post">
+                        <input type="hidden" name="product_id" value="{{ p.id }}">
+                        <button type="submit" class="w-full bg-green-600 py-2 rounded-xl mt-2 font-bold hover:bg-green-500 transition">استلام الأرباح</button>
+                    </form>
+                {% else %}
+                    <div class="w-full bg-gray-800 py-2 rounded-xl text-center border border-gray-700 mt-2">
+                        <p class="text-gray-400 text-[10px]">متاح بعد:</p>
+                        <h3 id="timer-{{ p.id }}" class="text-sm font-bold text-yellow-500" data-last="{{ p.last_claim }}">جاري الحساب...</h3>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2 class="text-xl font-bold mb-4 text-white">أسطول الدرون المتاح</h2>
+        <div class="space-y-4">
+            {% for level, plan in plans.items() %}
+            
+            {% set prod = products | selectattr("id", "equalto", level) | first %}
+            {% set is_locked = prod and not prod.is_active %}
+
+            <div class="glass p-5 rounded-2xl border {{ 'border-green-500' if user.vip_level == level else 'border-white/10' }} {{ 'opacity-50 grayscale' if is_locked else '' }}">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-900/50 p-1 rounded-xl relative">
+                        <img src="/static/drones/{{ level }}.jpg" alt="Drone" class="w-16 h-16 object-cover rounded-lg">
+                        {% if is_locked %}
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                            <i class="fas fa-lock text-white text-xl"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold text-yellow-500">{{ plan.name }}</h3>
+                        <div class="flex gap-4 text-xs text-gray-400 mt-1">
+                            <p>يومي: <span class="text-green-400">{{ plan.daily }} ج.م</span></p>
+                            <p>المدة: <span class="text-white">{{ plan.days }} يوم</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-left font-bold text-white">
+                        {{ plan.cost }} <span class="text-[10px]">ج.م</span>
+                    </div>
+                </div>
+
+                {% if is_locked %}
+                    <button disabled class="w-full bg-gray-800 py-2 rounded-xl font-bold text-gray-500 mt-4 cursor-not-allowed">
+                        <i class="fas fa-lock"></i> غير متاح حالياً
+                    </button>
+                {% elif user.vip_level < level %}
+                    {% if user.balance >= plan.cost %}
+                        <form action="/buy-product/{{ level }}" method="post" class="mt-4">
+                            <button type="submit" class="w-full bg-blue-600 py-2 rounded-xl font-bold text-white hover:bg-blue-500 transition">شراء المنتج</button>
+                        </form>
+                    {% else %}
+                        <div class="mt-4">
+                            <button onclick="showInsufficientBalance(event)" class="w-full bg-red-600 py-2 rounded-xl font-bold text-white hover:bg-red-500 transition">شراء المنتج</button>
+                            <p id="msg-{{ level }}" class="text-red-400 text-xs mt-2 hidden text-center">
+                                عذراً، رصيدك غير كافي. <a href="/deposit" class="underline font-bold text-white">إيداع الآن</a>
+                            </p>
+                        </div>
+                    {% endif %}
+                {% elif user.vip_level == level %}
+                    <button disabled class="w-full bg-gray-700 py-2 rounded-xl font-bold text-gray-400 mt-4 cursor-not-allowed">مشترك حالياً</button>
+                {% else %}
+                    <button disabled class="w-full bg-gray-800 py-2 rounded-xl font-bold text-gray-500 mt-4 opacity-50">تم التخطي</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="fixed bottom-0 right-0 left-0 glass border-t border-white/10 p-4 flex justify-around">
+            <a href="/" class="text-gray-400 hover:text-white"><i class="fas fa-home"></i></a>
+            <a href="/products" class="text-yellow-500"><i class="fas fa-robot"></i></a>
+            <a href="/team" class="text-gray-400 hover:text-white"><i class="fas fa-users"></i></a>
+            <a href="/profile" class="text-gray-400 hover:text-white"><i class="fas fa-user"></i></a>
+        </div>
+        <div class="h-20"></div>
+    </div>
+
+    <script>
+        function startTimers() {
+            document.querySelectorAll('[id^="timer-"]').forEach(el => {
+                let lastClaimStr = el.getAttribute('data-last');
+                if (lastClaimStr === "0") return;
+                
+                let lastClaim = new Date(lastClaimStr.replace(' ', 'T'));
+                let unlockTime = new Date(lastClaim.getTime() + 24 * 60 * 60 * 1000);
+                
+                function update() {
+                    let now = new Date();
+                    let diff = unlockTime - now;
+                    if (diff <= 0) { el.innerText = "جاهز!"; return; }
+                    let h = Math.floor(diff / 3600000);
+                    let m = Math.floor((diff % 3600000) / 60000);
+                    let s = Math.floor((diff % 60000) / 1000);
+                    el.innerText = h + "س : " + m + "د : " + s + "ث";
+                }
+                setInterval(update, 1000);
+                update();
+            });
+        }
+        startTimers();
+
+        function showInsufficientBalance(event) {
+            let messages = document.querySelectorAll('[id^="msg-"]');
+            messages.forEach(msg => msg.classList.add('hidden'));
+            event.target.nextElementSibling.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
