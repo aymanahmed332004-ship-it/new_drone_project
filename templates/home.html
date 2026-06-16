@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    body { background: radial-gradient(circle at top, #1e293b, #0f172a, #020617); }
+</style>
+
+<div class="swiper mySwiper w-full h-40 mb-6 rounded-3xl overflow-hidden border border-white/10 shadow-lg">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="{{ url_for('static', path='/ads/1.jpg') }}" class="w-full h-full object-cover"></div>
+        <div class="swiper-slide"><img src="{{ url_for('static', path='/ads/2.jpg') }}" class="w-full h-full object-cover"></div>
+        <div class="swiper-slide"><img src="{{ url_for('static', path='/ads/3.jpg') }}" class="w-full h-full object-cover"></div>
+        <div class="swiper-slide"><img src="{{ url_for('static', path='/ads/4.jpg') }}" class="w-full h-full object-cover"></div>
+    </div>
+</div>
+
+<script>
+    var swiper = new Swiper(".mySwiper", {
+        loop: true,
+        autoplay: { delay: 3000, disableOnInteraction: false },
+        effect: 'fade',
+    });
+</script>
+
+<div class="glass bg-sky-950/20 p-6 rounded-3xl mb-6 border border-sky-500/30">
+    <p class="text-white/60 text-sm">مرحباً بك في AT Group</p>
+    <h2 class="text-2xl font-bold text-sky-400">{{ user.phone }}</h2>
+</div>
+
+<div class="glass bg-amber-950/10 p-8 rounded-3xl text-center mb-6 border border-yellow-500/30 shadow-[0_0_25px_rgba(234,179,8,0.1)]">
+    <p class="text-white/60 font-medium">الرصيد الحالي</p>
+    <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600 my-3">
+        {{ "%.2f" | format(user.balance) }} <span class="text-xl">ج.م</span>
+    </h1>
+</div>
+
+<div class="flex justify-between gap-2 mb-8 px-2">
+    <a href="/deposit" class="flex flex-col items-center gap-2">
+        <div class="w-16 h-16 glass rounded-full flex items-center justify-center border border-sky-500/30 hover:bg-sky-900/50 transition duration-300 shadow-lg">
+            <i class="fas fa-download text-sky-400 text-xl"></i>
+        </div>
+        <span class="text-xs font-bold text-white/80">إيداع</span>
+    </a>
+    <a href="/withdraw" class="flex flex-col items-center gap-2">
+        <div class="w-16 h-16 glass rounded-full flex items-center justify-center border border-sky-500/30 hover:bg-sky-900/50 transition duration-300 shadow-lg">
+            <i class="fas fa-upload text-sky-400 text-xl"></i>
+        </div>
+        <span class="text-xs font-bold text-white/80">سحب</span>
+    </a>
+    <button onclick="document.getElementById('support-modal').classList.remove('hidden')" class="flex flex-col items-center gap-2">
+        <div class="w-16 h-16 glass rounded-full flex items-center justify-center border border-sky-500/30 hover:bg-sky-900/50 transition duration-300 shadow-lg">
+            <i class="fas fa-headset text-sky-400 text-xl"></i>
+        </div>
+        <span class="text-xs font-bold text-white/80">الدعم</span>
+    </button>
+    <a href="/team" class="flex flex-col items-center gap-2">
+        <div class="w-16 h-16 glass rounded-full flex items-center justify-center border border-sky-500/30 hover:bg-sky-900/50 transition duration-300 shadow-lg">
+            <i class="fas fa-users text-sky-400 text-xl"></i>
+        </div>
+        <span class="text-xs font-bold text-white/80">الفريق</span>
+    </a>
+</div>
+
+<div class="glass p-4 rounded-3xl border border-white/5 mb-8">
+    <a href="/security" class="flex items-center justify-between p-2 hover:bg-white/5 rounded-xl transition">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 flex items-center justify-center bg-yellow-500/10 rounded-full text-yellow-500">
+                <i class="fas fa-lock"></i>
+            </div>
+            <div>
+                <p class="font-bold">إعدادات الأمان</p>
+                <p class="text-[10px] text-white/50">تغيير كلمة مرور السحب</p>
+            </div>
+        </div>
+        <i class="fas fa-chevron-left text-white/30"></i>
+    </a>
+</div>
+
+<div id="support-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+    <div class="glass w-full max-w-sm p-6 rounded-3xl border border-yellow-500/30 shadow-2xl">
+        <h3 class="text-xl font-bold mb-6 text-center text-yellow-500">طرق التواصل</h3>
+        <div class="space-y-4">
+            <a href="https://wa.me/qr/4JFAQLYYTICSM1" target="_blank" class="flex items-center gap-4 p-4 bg-black/40 rounded-xl hover:bg-green-900/30 transition border border-green-500/20">
+                <i class="fab fa-whatsapp text-green-500 text-2xl"></i>
+                <span class="font-bold">خدمة العملاء (واتساب)</span>
+            </a>
+            <a href="https://chat.whatsapp.com/IBZZPB9O8He77MjCL7nklQ" target="_blank" class="flex items-center gap-4 p-4 bg-black/40 rounded-xl hover:bg-green-900/30 transition border border-green-500/20">
+                <i class="fab fa-whatsapp text-green-500 text-2xl"></i>
+                <span class="font-bold">مجموعة الواتس الرسمية</span>
+            </a>
+            <a href="https://chat.whatsapp.com/D5z2ef9jFCADRSF9zl0GDU" target="_blank" class="flex items-center gap-4 p-4 bg-black/40 rounded-xl hover:bg-green-900/30 transition border border-green-500/20">
+                <i class="fab fa-whatsapp text-green-500 text-2xl"></i>
+                <span class="font-bold">قناة (مجتمع) الواتس</span>
+            </a>
+        </div>
+        <button onclick="document.getElementById('support-modal').classList.add('hidden')" class="w-full mt-6 py-3 text-white/50 hover:text-white font-bold uppercase">إغلاق</button>
+    </div>
+</div>
+
+<div id="welcome-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+    <div class="glass p-6 rounded-3xl border border-sky-500/30 max-w-sm w-full z-10 bg-[#0b1221] shadow-2xl text-center">
+        <h2 class="text-2xl font-bold mb-4 text-sky-400">مرحباً بك في AT Group</h2>
+        <div class="text-white/80 text-sm leading-relaxed mb-6 text-right space-y-4">
+            <p>
+                AT Group هي منصة استثمارية حديثة تتيح للأعضاء فرصة المشاركة في مشاريع الطائرات بدون طيار (الدرون) وتحقيق عوائد دورية من خلال خطط استثمارية متنوعة. نسعى إلى توفير تجربة استثمارية سهلة وآمنة، مع نظام متطور يضمن متابعة الأرباح وإدارة الاستثمارات بكل شفافية واحترافية.
+            </p>
+            <p>
+                <strong>برنامج الإحالة والمكافآت</strong><br>
+                توفر AT Group نظام إحالة متعدد المستويات يمنح الأعضاء فرصة تحقيق دخل إضافي من خلال دعوة الأصدقاء للانضمام إلى المنصة:<br>
+                🔹 المستوى الأول: احصل على عمولة تصل إلى 30% من نشاط الأشخاص الذين قمت بدعوتهم مباشرة.<br>
+                🔹 المستوى الثاني: احصل على 20% من نشاط الأعضاء الذين انضموا عبر إحالات المستوى الأول.<br>
+                🔹 المستوى الثالث: استمتع بمكافآت إضافية تصل إلى 10% من نشاط الأعضاء المنضمين عبر المستوى الثاني.
+            </p>
+            <p class="text-yellow-500 font-bold">
+                ✨ كلما توسعت شبكة الإحالات الخاصة بك، ازدادت فرصك في تحقيق مكافآت وأرباح إضافية داخل المنصة.
+            </p>
+            <p class="font-bold">AT Group – استثمر بذكاء، ووسّع فرص نجاحك. 🚀</p>
+        </div>
+        
+        <button onclick="closeModal()" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 py-3 rounded-xl font-bold text-white hover:scale-105 transition-transform">
+            إغلاق
+        </button>
+    </div>
+</div>
+
+<script>
+    function closeModal() {
+        document.getElementById('welcome-modal').style.display = 'none';
+    }
+</script>
+{% endblock %}
